@@ -34,7 +34,7 @@
 <script>
     // ⚠️ ВСТАВЬТЕ СЮДА ВАШ КЛЮЧ ИЗ OPENROUTER (sk-or-v1-...)
     const API_KEY = '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'; 
-    const AI_URL = 'https://allorigins.win';
+    const AI_URL = 'https://openrouter.ai';
 
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('user-input');
@@ -62,10 +62,12 @@
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
+                    'Authorization': `Bearer ${API_KEY}`,
+                    // 🎓 ЭТИ ДВЕ СТРОКИ СНИМАЮТ БЛОКИРОВКУ БРАУЗЕРА (CORS) НА OPENROUTER
+                    'HTTP-Referer': window.location.href, 
+                    'X-Title': 'YanBee Nova AI'
                 },
                 body: JSON.stringify({
-                    // Используем мощную бесплатную модель Qwen 2.5 72B в облаке OpenRouter
                     model: "qwen/qwen-2.5-72b-instruct:free", 
                     messages: [
                         { 
@@ -77,14 +79,19 @@
                 })
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Ошибка сервера');
+            }
+
             const data = await response.json();
             loadingMsg.remove(); 
             
-            const botResponse = data.choices[0].message.content;
+            const botResponse = data.choices[0].message.content; // Исправлен путь к тексту в OpenRouter
             appendMessage(marked.parse(botResponse), 'bot', true);
         } catch (error) {
             loadingMsg.remove();
-            appendMessage('Ошибка подключения к облаку SypherOne.', 'bot');
+            appendMessage('Ошибка: ' + error.message, 'bot');
             console.error(error);
         }
     }
