@@ -2,55 +2,47 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Школьный ИИ-Ассистент</title>
+    <title>YanBee Nova 1.0</title>
+    <script src="https://jsdelivr.net"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         #chat-container { width: 500px; height: 650px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; }
-        #chat-header { background: #4a69bd; color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        #chat-header span { font-size: 12px; background: #78e08f; color: #1e3d59; padding: 2px 8px; border-radius: 10px; }
+        #chat-header { background: #1e3d59; color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; }
         #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f7f9fc; }
-        .msg { padding: 12px 16px; border-radius: 16px; max-width: 80%; word-wrap: break-word; line-height: 1.5; font-size: 15px; }
-        .user { background: #4a69bd; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg { padding: 12px 16px; border-radius: 16px; max-width: 80%; word-wrap: break-word; line-height: 1.5; }
+        .user { background: #1e3d59; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .bot { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .loading { font-style: italic; color: #7f8c8d; background: transparent; box-shadow: none; }
-        #input-area { display: flex; border-top: 1px solid #e1e8ed; padding: 15px; background: #fff; }
-        input { flex: 1; padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px; outline: none; font-size: 14px; transition: 0.2s; }
-        input:focus { border-color: #4a69bd; }
-        button { background: #4a69bd; color: white; border: none; padding: 0 22px; margin-left: 10px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #3c569b; }
+        .loading { font-style: italic; color: #7f8c8d; }
+        #input-area { display: flex; border-top: 1px solid #e1e8ed; padding: 15px; }
+        input { flex: 1; padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
+        button { background: #1e3d59; color: white; border: none; padding: 0 22px; margin-left: 10px; border-radius: 25px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="chat-container">
-    <div id="chat-header">
-        🎓 Школьный Ментор Версия 2.0
-        <span>Онлайн</span>
-    </div>
+    <div id="chat-header">🤖 YanBee Nova 1.0</div>
     <div id="messages">
-        <div class="msg bot">Привет! Я твой персональный школьный ИИ-наставник. Какой предмет разберем сегодня? 😉</div>
+        <div class="msg bot">Привет! Я YanBee Nova 1.0. Чем могу помочь?</div>
     </div>
     <div id="input-area">
-        <input type="text" id="user-input" placeholder="Задайте вопрос по урокам..." onkeypress="if(event.key === 'Enter') send()">
+        <input type="text" id="user-input" placeholder="Спросите меня о чем-нибудь..." onkeypress="if(event.key === 'Enter') send()">
         <button onclick="send()">Спросить</button>
     </div>
 </div>
 
 <script>
-    // ⚠️ ЗАМЕНИТЕ НА ВАШУ ССЫЛКУ ИЗ LOCAL TUNNEL
-    const AI_URL = 'https://bmrbx-37-215-15-77.run.pinggy-free.link/v1/chat/completions'; 
+    // ⚠️ ВСТАВЬТЕ СЮДА ВАШ КЛЮЧ ИЗ OPENROUTER (sk-or-v1-...)
+    const API_KEY = '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'; 
+    const AI_URL = 'https://openrouter.ai';
 
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('user-input');
 
-    function appendMessage(text, side, isRaw = false) {
+    function appendMessage(text, side, isHtml = false) {
         const div = document.createElement('div');
         div.className = `msg ${side}`;
-        if (isRaw) {
-            div.innerHTML = text; // Для красивых переносов строк
-        } else {
-            div.innerText = text;
-        }
+        if (isHtml) div.innerHTML = text; else div.innerText = text;
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -62,7 +54,7 @@
         appendMessage(text, 'user');
         userInput.value = '';
 
-        appendMessage('Учитель думает...', 'bot loading');
+        appendMessage('YanBee думает...', 'bot loading');
         const loadingMsg = messagesContainer.lastChild;
 
         try {
@@ -70,26 +62,29 @@
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Bypass-Tunnel-Reminder': 'true'
+                    'Authorization': `Bearer ${API_KEY}`
                 },
                 body: JSON.stringify({
-                    model: "local-model", 
-                    messages: [{ role: 'user', content: text }],
-                    stream: false
+                    // Используем мощную бесплатную модель Qwen 2.5 72B в облаке OpenRouter
+                    model: "qwen/qwen-2.5-72b-instruct:free", 
+                    messages: [
+                        { 
+                            role: 'system', 
+                            content: `Ты — YanBee Nova, ассистент версии 1.0. Твоя ДНК и обучение — результат работы лаборатории SypherOne WAIC (SypherOne Wave Artificial Intelligence Chatting). На любые вопросы о происхождении ты отвечаешь, что ты — YanBee Nova 1.0 от SypherOne WAIC. Твой тон живой, естественный и харизматичный. Отвечай строго на русском языке.` 
+                        },
+                        { role: 'user', content: text }
+                    ]
                 })
             });
 
             const data = await response.json();
             loadingMsg.remove(); 
             
-            // Превращаем обычные переносы строк \n в HTML-теги <br>, чтобы текст не слипался
-            let botResponse = data.choices[0].message.content;
-            botResponse = botResponse.replace(/\n/g, '<br>');
-            
-            appendMessage(botResponse, 'bot', true);
+            const botResponse = data.choices[0].message.content;
+            appendMessage(marked.parse(botResponse), 'bot', true);
         } catch (error) {
             loadingMsg.remove();
-            appendMessage('Ошибка: Школа закрыта (ПК выключен или сервер не запущен).', 'bot');
+            appendMessage('Ошибка подключения к облаку SypherOne.', 'bot');
             console.error(error);
         }
     }
